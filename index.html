@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <title>WARLOGS - Refine Aracı</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #111827;
+      color: #e5e7eb;
+      margin: 0;
+      padding: 20px;
+    }
+    h1, h2 {
+      color: #f9fafb;
+    }
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+      background-color: #1f2937;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.4);
+      position: relative;
+      overflow: hidden;
+      display: none; /* Şifre girilene kadar gizli */
+    }
+    /* Üst başlık bandı */
+    .selfx-banner {
+      position: absolute;
+      top: 0;
+      right: 0;
+      background: linear-gradient(135deg, #3b82f6, #a855f7);
+      padding: 6px 14px;
+      border-bottom-left-radius: 12px;
+      font-size: 12px;
+      font-weight: 700;
+      color: #f9fafb;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+    .subtitle {
+      font-size: 13px;
+      color: #9ca3af;
+      margin-top: -6px;
+      margin-bottom: 16px;
+    }
+    .row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+    .card {
+      background-color: #111827;
+      border-radius: 6px;
+      padding: 10px;
+      border: 1px solid #374151;
+      flex: 1 1 200px;
+      min-width: 200px;
+    }
+    label {
+      display: block;
+      font-size: 14px;
+      margin-bottom: 4px;
+      color: #d1d5db;
+    }
+    select, input[type="number"], input[type="password"], input[type="text"] {
+      width: 100%;
+      padding: 6px 8px;
+      border-radius: 4px;
+      border: 1px solid #4b5563;
+      background-color: #020617;
+      color: #e5e7eb;
+      box-sizing: border-box;
+    }
+    input:focus, select:focus {
+      outline: none;
+      border-color: #3b82f6;
+    }
+    button {
+      padding: 8px 16px;
+      border-radius: 4px;
+      border: none;
+      background-color: #3b82f6;
+      color: white;
+      cursor: pointer;
+      font-weight: 600;
+      margin-right: 8px;
+    }
+    button:hover {
+      background-color: #2563eb;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+    }
+    th, td {
+      border: 1px solid #374151;
+      padding: 6px 8px;
+      text-align: center;
+      font-size: 14px;
+    }
+    th {
+      background-color: #111827;
+    }
+    .footer {
+      font-size: 12px;
+      color: #9ca3af;
+      margin-top: 10px;
+    }
+    .result-highlight {
+      font-weight: bold;
+      color: #a5b4fc;
+    }
+    .return-box {
+      margin-top: 10px;
+      padding: 8px;
+      border-radius: 6px;
+      background-color: #020617;
+      border: 1px solid #4b5563;
+      font-size: 13px;
+    }
+    .return-title {
+      font-weight: 600;
+      color: #22c55e;
+      margin-bottom: 4px;
+    }
+
+    /* WARLOGS yan şeritleri */
+    .warlogs-side {
+      position: fixed;
+      top: 50%;
+      transform: translateY(-50%);
+      writing-mode: vertical-rl;
+      text-orientation: mixed;
+      font-weight: 700;
+      letter-spacing: 0.2em;
+      color: #4b5563;
+      font-size: 12px;
+      pointer-events: none;
+      user-select: none;
+    }
+    .warlogs-left {
+      left: 6px;
+    }
+    .warlogs-right {
+      right: 6px;
+    }
+
+    /* Şifre ekranı */
+    .lock-screen {
+      max-width: 380px;
+      margin: 80px auto 0;
+      background-color: #1f2937;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 0 15px rgba(0,0,0,0.6);
+      text-align: center;
+    }
+    .lock-title {
+      font-size: 20px;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+    .lock-subtitle {
+      font-size: 13px;
+      color: #9ca3af;
+      margin-bottom: 16px;
+    }
+    .lock-error {
+      color: #f87171;
+      font-size: 12px;
+      margin-top: 6px;
+      min-height: 16px;
+    }
+  </style>
+</head>
+<body>
+
+<div class="warlogs-side warlogs-left">WARLOGS</div>
+<div class="warlogs-side warlogs-right">WARLOGS</div>
+
+<!-- Şifre ekranı -->
+<div class="lock-screen" id="lockScreen">
+  <div class="lock-title">WARLOGS</div>
+  <div class="lock-subtitle">
+    Bu refine aracı sadece WARLOGS için. Devam etmek için şifreyi gir.
+  </div>
+  <div style="text-align:left; margin-bottom:10px;">
+    <label for="passwordInput">Şifre</label>
+    <input id="passwordInput" type="password" placeholder="Şifreyi gir..." />
+  </div>
+  <button id="unlockBtn">Giriş Yap</button>
+  <div class="lock-error" id="lockError"></div>
+</div>
+
+<!-- Asıl uygulama -->
+<div class="container" id="appContainer">
+  <div class="selfx-banner">
+    WARLOGS • Tool by SELFX
+  </div>
+
+  <h1>WARLOGS - Refine Aracı</h1>
+  <p class="subtitle">
+    Tek bir refine adımı için: alt tier refined + üst tier ham → üst tier refined hesabı.
+  </p>
+
+  <!-- 1. Kaynak Tipi + Adım -->
+  <h2>1. Kaynak Tipi ve Refine Adımı</h2>
+  <div class="row">
+    <div class="card">
+      <label for="resourceType">Kaynak Tipi</label>
+      <select id="resourceType">
+        <option value="log" selected>Log</option>
+        <option value="fiber">Fiber</option>
+        <option value="leather">Leather</option>
+        <option value="ore">Ore</option>
+      </select>
+    </div>
+    <div class="card">
+      <label for="stepSelect">Refine Adımı</label>
+      <select id="stepSelect">
+        <option value="3-4">T3 → T4</option>
+        <option value="4-5" selected>T4 → T5</option>
+        <option value="5-6">T5 → T6</option>
+        <option value="6-7">T6 → T7</option>
+        <option value="7-8">T7 → T8</option>
+      </select>
+      <p style="font-size:11px;color:#9ca3af;margin-top:6px;">
+        Adımı değiştirdiğinde gerekli plank / log sayıları otomatik güncellenir.
+      </p>
+    </div>
+  </div>
+
+  <!-- 2. Stok Girişi -->
+  <h2>2. Stok Girişi</h2>
+  <div class="row">
+    <div class="card">
+      <label id="labelPlank" for="plankInput">Alt Tier (refined) stok</label>
+      <input id="plankInput" type="number" value="60" min="0" />
+    </div>
+    <div class="card">
+      <label id="labelLog" for="logInput">Üst Tier (ham) stok</label>
+      <input id="logInput" type="number" value="30" min="0" />
+    </div>
+  </div>
+
+  <!-- 3. Oran ve Return -->
+  <h2>3. Oran ve Return Rate</h2>
+  <div class="row">
+    <div class="card">
+      <label for="plankPerOutput">1 output için kaç refined (alt tier)?</label>
+      <input id="plankPerOutput" type="number" value="1" min="1" step="1" />
+    </div>
+    <div class="card">
+      <label for="logPerOutput">1 output için kaç ham (üst tier)?</label>
+      <input id="logPerOutput" type="number" value="3" min="1" step="1" />
+    </div>
+    <div class="card">
+      <label for="returnRate">Return rate (%)</label>
+      <input id="returnRate" type="number" value="35" min="0" max="100" step="1" />
+    </div>
+  </div>
+
+  <div class="row">
+    <button id="calcBtn">Hesapla</button>
+    <button id="resetBtn" style="background-color:#6b7280;">Sıfırla</button>
+  </div>
+
+  <!-- 4. Sonuç -->
+  <h2>4. Sonuç</h2>
+  <div id="results"></div>
+
+  <p class="footer">
+    Oranlar adım seçimine göre otomatik doldurulur: T4→T5: 1 refined + 3 ham, T5→T6: 1 + 4, T6→T7: 1 + 5, T7→T8: 1 + 5.  
+    Kaynak tipine göre sadece isimler değişir (log / fiber / leather / ore).
+  </p>
+</div>
+
+<script>
+  /* === ŞİFRE AYARI ===
+     Şifre: selfx
+  */
+  const PASSWORD = "selfx";
+  let failCount = 0;
+  const MAX_FAILS = 3;
+
+  const lockScreen = document.getElementById("lockScreen");
+  const appContainer = document.getElementById("appContainer");
+  const passwordInput = document.getElementById("passwordInput");
+  const unlockBtn = document.getElementById("unlockBtn");
+  const lockError = document.getElementById("lockError");
+
+  function tryUnlock() {
+    if (failCount >= MAX_FAILS) {
+      return;
+    }
+
+    const entered = passwordInput.value.trim();
+
+    if (entered === PASSWORD) {
+      lockScreen.style.display = "none";
+      appContainer.style.display = "block";
+      lockError.textContent = "";
+      passwordInput.value = "";
+      failCount = 0;
+    } else {
+      failCount++;
+      if (failCount >= MAX_FAILS) {
+        lockError.textContent =
+          "3 kez yanlış girdin. Uygulama kilitlendi. Tekrar denemek için sayfayı yenile.";
+        passwordInput.disabled = true;
+        unlockBtn.disabled = true;
+        unlockBtn.style.backgroundColor = "#4b5563";
+      } else {
+        const kalan = MAX_FAILS - failCount;
+        lockError.textContent =
+          "Hatalı şifre. Kalan deneme: " + kalan;
+      }
+    }
+  }
+
+  unlockBtn.addEventListener("click", tryUnlock);
+  passwordInput.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") {
+      tryUnlock();
+    }
+  });
+
+  /* === Asıl hesaplama scripti === */
+
+  const stepSelect   = document.getElementById("stepSelect");
+  const resourceType = document.getElementById("resourceType");
+  const labelPlank   = document.getElementById("labelPlank");
+  const labelLog     = document.getElementById("labelLog");
+
+  const plankPerInput = document.getElementById("plankPerOutput");
+  const logPerInput   = document.getElementById("logPerOutput");
+
+  // Adıma göre otomatik oranlar
+  function setRatiosForStep() {
+    const step = stepSelect.value;
+    // T3→T4 için varsayılan: 1 refined + 2 ham (istersen bunu değiştiririm)
+    if (step === "3-4") {
+      plankPerInput.value = 1;
+      logPerInput.value   = 2;
+    } else if (step === "4-5") {
+      plankPerInput.value = 1;
+      logPerInput.value   = 3; // T4→T5
+    } else if (step === "5-6") {
+      plankPerInput.value = 1;
+      logPerInput.value   = 4; // T5→T6
+    } else if (step === "6-7") {
+      plankPerInput.value = 1;
+      logPerInput.value   = 5; // T6→T7
+    } else if (step === "7-8") {
+      plankPerInput.value = 1;
+      logPerInput.value   = 5; // T7→T8
+    }
+  }
+
+  // Kaynak tipine göre label isimlerini güncelle
+  function updateLabels() {
+    const step = stepSelect.value;
+    const type = resourceType.value;
+
+    let refinedName = "";
+    let rawName = "";
+
+    if (type === "log") {
+      refinedName = "plank";
+      rawName     = "log";
+    } else if (type === "fiber") {
+      refinedName = "cloth";
+      rawName     = "fiber";
+    } else if (type === "leather") {
+      refinedName = "leather";
+      rawName     = "hide";
+    } else if (type === "ore") {
+      refinedName = "metal bar";
+      rawName     = "ore";
+    }
+
+    // Alt ve üst tier text
+    let textPlank = "";
+    let textLog   = "";
+
+    if (step === "3-4") {
+      textPlank = "T3 " + refinedName + " (alt tier) stok";
+      textLog   = "T4 " + rawName     + " (üst tier, ham) stok";
+    } else if (step === "4-5") {
+      textPlank = "T4 " + refinedName + " (alt tier) stok";
+      textLog   = "T5 " + rawName     + " (üst tier, ham) stok";
+    } else if (step === "5-6") {
+      textPlank = "T5 " + refinedName + " (alt tier) stok";
+      textLog   = "T6 " + rawName     + " (üst tier, ham) stok";
+    } else if (step === "6-7") {
+      textPlank = "T6 " + refinedName + " (alt tier) stok";
+      textLog   = "T7 " + rawName     + " (üst tier, ham) stok";
+    } else if (step === "7-8") {
+      textPlank = "T7 " + refinedName + " (alt tier) stok";
+      textLog   = "T8 " + rawName     + " (üst tier, ham) stok";
+    }
+
+    labelPlank.textContent = textPlank;
+    labelLog.textContent   = textLog;
+  }
+
+  function onStepOrResourceChange() {
+    setRatiosForStep();
+    updateLabels();
+  }
+
+  stepSelect.addEventListener("change", onStepOrResourceChange);
+  resourceType.addEventListener("change", updateLabels);
+
+  // Başlangıçta ilk set
+  setRatiosForStep();
+  updateLabels();
+
+  function calculate() {
+    const plankStock = Number(document.getElementById("plankInput").value) || 0;
+    const logStock   = Number(document.getElementById("logInput").value) || 0;
+    const plankPer   = Number(plankPerInput.value) || 0;
+    const logPer     = Number(logPerInput.value) || 0;
+    let returnRate   = Number(document.getElementById("returnRate").value) || 0;
+
+    if (plankPer <= 0 || logPer <= 0) {
+      document.getElementById("results").innerHTML =
+        "<p>Lütfen oranları 0'dan büyük gir.</p>";
+      return;
+    }
+
+    if (returnRate < 0) returnRate = 0;
+    if (returnRate > 100) returnRate = 100;
+
+    // Max craft
+    const maxByPlank = Math.floor(plankStock / plankPer);
+    const maxByLog   = Math.floor(logStock   / logPer);
+    const crafts     = Math.min(maxByPlank, maxByLog);
+
+    const usedPlank = crafts * plankPer;
+    const usedLog   = crafts * logPer;
+
+    const remainPlank = plankStock - usedPlank;
+    const remainLog   = logStock   - usedLog;
+
+    // RETURN
+    const totalUsed = usedPlank + usedLog;
+    const returnedTotal = Math.floor(totalUsed * (returnRate / 100));
+
+    let returnedPlank = 0;
+    let returnedLog = 0;
+    if (totalUsed > 0) {
+      returnedPlank = Math.floor(returnedTotal * (usedPlank / totalUsed));
+      returnedLog   = returnedTotal - returnedPlank;
+    }
+
+    const finalPlank = remainPlank + returnedPlank;
+    const finalLog   = remainLog   + returnedLog;
+
+    // EK: Kalan log (veya fiber/ore/hide) ile max craft + gereken plank
+    const extraCrafts = Math.floor(finalLog / logPer);
+    const extraPlankNeeded = extraCrafts * plankPer;
+
+    const stepText = stepSelect.options[stepSelect.selectedIndex].text;
+    const typeText = resourceType.options[resourceType.selectedIndex].text;
+
+    const html = `
+      <table>
+        <thead>
+          <tr>
+            <th>Kaynak Tipi</th>
+            <th>Refine Adımı</th>
+            <th>Craft Sayısı (üretilen üst tier refined)</th>
+            <th>Harcanan refined</th>
+            <th>Harcanan ham</th>
+            <th>Kalan refined</th>
+            <th>Kalan ham</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>${typeText}</td>
+            <td>${stepText}</td>
+            <td>${crafts}</td>
+            <td>${usedPlank}</td>
+            <td>${usedLog}</td>
+            <td>${remainPlank}</td>
+            <td>${remainLog}</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="return-box">
+        <div class="return-title">Return Hesabı (Rate: ${returnRate}%)</div>
+        <p>
+          Toplam kullanılan materyal: ${totalUsed}<br/>
+          Geri dönen toplam materyal: ${returnedTotal}<br/>
+          - Geri dönen refined: ${returnedPlank}<br/>
+          - Geri dönen ham: ${returnedLog}
+        </p>
+        <p class="result-highlight">
+          Return sonrası final stok:<br/>
+          Refined: ${finalPlank} | Ham: ${finalLog}
+        </p>
+        <p>
+          Üretilen üst tier refined: <strong>${crafts} adet</strong>
+        </p>
+        <hr style="border-color:#374151; margin:8px 0;" />
+        <p>
+          Kalan <strong>ham</strong> ile teorik maksimum ek craft:<br/>
+          <strong>${extraCrafts} craft</strong> daha yapılabilir.<br/>
+          Bunun için gereken <strong>refined</strong> miktarı: <strong>${extraPlankNeeded}</strong>
+        </p>
+      </div>
+    `;
+    document.getElementById("results").innerHTML = html;
+  }
+
+  function resetForm() {
+    document.getElementById("plankInput").value = 60;
+    document.getElementById("logInput").value   = 30;
+    document.getElementById("returnRate").value = 35;
+    resourceType.value = "log";
+    stepSelect.value   = "4-5";
+    setRatiosForStep();
+    updateLabels();
+    document.getElementById("results").innerHTML = "";
+  }
+
+  document.getElementById("calcBtn").addEventListener("click", calculate);
+  document.getElementById("resetBtn").addEventListener("click", resetForm);
+</script>
+</body>
+</html>
