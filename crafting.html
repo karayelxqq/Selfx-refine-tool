@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>WARLOGS - Refining Tool</title>
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    background-color: #111827;
+    color: #e5e7eb;
+    margin: 0;
+    padding: 20px;
+  }
+  h1, h2 {
+    color: #f9fafb;
+  }
+  .container {
+    max-width: 900px;
+    margin: 0 auto;
+    background-color: #1f2937;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.4);
+    position: relative;
+    overflow: hidden;
+    display: none;
+  }
+  .selfx-banner {
+    position: absolute;
+    top: 0;
+    right: 0;
+    background: linear-gradient(135deg, #3b82f6, #a855f7);
+    padding: 6px 14px;
+    border-bottom-left-radius: 12px;
+    font-size: 12px;
+    font-weight: 700;
+    color: #f9fafb;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+  .subtitle {
+    font-size: 13px;
+    color: #9ca3af;
+    margin-top: -6px;
+    margin-bottom: 16px;
+  }
+  .row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-bottom: 16px;
+  }
+  .card {
+    background-color: #111827;
+    border-radius: 6px;
+    padding: 10px;
+    border: 1px solid #374151;
+    flex: 1 1 200px;
+    min-width: 200px;
+  }
+  label {
+    display: block;
+    font-size: 14px;
+    margin-bottom: 4px;
+    color: #d1d5db;
+  }
+  select, input[type="number"], input[type="password"], input[type="text"] {
+    width: 100%;
+    padding: 6px 8px;
+    border-radius: 4px;
+    border: 1px solid #4b5563;
+    background-color: #020617;
+    color: #e5e7eb;
+    box-sizing: border-box;
+  }
+  input:focus, select:focus {
+    outline: none;
+    border-color: #3b82f6;
+  }
+  button {
+    padding: 8px 16px;
+    border-radius: 4px;
+    border: none;
+    background-color: #3b82f6;
+    color: white;
+    cursor: pointer;
+    font-weight: 600;
+    margin-right: 8px;
+  }
+  button:hover {
+    background-color: #2563eb;
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+  }
+  th, td {
+    border: 1px solid #374151;
+    padding: 6px 8px;
+    text-align: center;
+    font-size: 14px;
+  }
+  th {
+    background-color: #111827;
+  }
+  .footer {
+    font-size: 12px;
+    color: #9ca3af;
+    margin-top: 10px;
+  }
+  .result-highlight {
+    font-weight: bold;
+    color: #a5b4fc;
+  }
+  .return-box {
+    margin-top: 10px;
+    padding: 8px;
+    border-radius: 6px;
+    background-color: #020617;
+    border: 1px solid #4b5563;
+    font-size: 13px;
+  }
+  .return-title {
+    font-weight: 600;
+    color: #22c55e;
+    margin-bottom: 4px;
+  }
+  .profit-positive {
+    color: #22c55e;
+    font-weight: bold;
+  }
+  .profit-negative {
+    color: #f87171;
+    font-weight: bold;
+  }
+  .profit-neutral {
+    color: #9ca3af;
+    font-weight: bold;
+  }
+  .warlogs-side {
+    position: fixed;
+    top: 50%;
+    transform: translateY(-50%);
+    writing-mode: vertical-rl;
+    text-orientation: mixed;
+    font-weight: 700;
+    letter-spacing: 0.2em;
+    color: #4b5563;
+    font-size: 12px;
+    pointer-events: none;
+    user-select: none;
+  }
+  .warlogs-left {
+    left: 6px;
+  }
+  .warlogs-right {
+    right: 6px;
+  }
+  .lock-screen {
+    max-width: 380px;
+    margin: 80px auto 0;
+    background-color: #1f2937;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 0 15px rgba(0,0,0,0.6);
+    text-align: center;
+  }
+  .lock-title {
+    font-size: 20px;
+    font-weight: 700;
+    margin-bottom: 8px;
+  }
+  .lock-subtitle {
+    font-size: 13px;
+    color: #9ca3af;
+    margin-bottom: 16px;
+  }
+  .lock-error {
+    color: #f87171;
+    font-size: 12px;
+    margin-top: 6px;
+    min-height: 16px;
+  }
+  .debug-info {
+    background-color: #020617;
+    border: 1px solid #374151;
+    padding: 8px;
+    margin-top: 10px;
+    font-size: 11px;
+    color: #9ca3af;
+    border-radius: 4px;
+  }
+</style>
+</head>
+<body>
+
+<div class="warlogs-side warlogs-left">WARLOGS</div>
+<div class="warlogs-side warlogs-right">WARLOGS</div>
+
+<!-- Lock screen -->
+<div class="lock-screen" id="lockScreen">
+<div class="lock-title">WARLOGS</div>
+<div class="lock-subtitle">
+  This refining tool is for WARLOGS only. Enter password to continue.
+</div>
+<div style="text-align:left; margin-bottom:10px;">
+  <label for="passwordInput">Password</label>
+  <input id="passwordInput" type="text" placeholder="Type: selfx" />
+</div>
+<button onclick="checkPassword()">Login</button>
+<div class="lock-error" id="lockError"></div>
+<div class="debug-info">
+  Debug: Password is "selfx" (without quotes)<br>
+  Try typing it and clicking Login
+</div>
+</div>
+
+<!-- Main application -->
+<div class="container" id="appContainer">
+<div class="selfx-banner">
+  WARLOGS • Tool by SELFX
+</div>
+
+<h1>WARLOGS - Refining Tool</h1>
+<p class="subtitle">
+  For a single refining step: lower tier refined + higher tier raw → higher tier refined calculation with economic analysis.
+</p>
+
+<!-- 1. Resource Type + Step -->
+<h2>1. Resource Type and Refining Step</h2>
+<div class="row">
+  <div class="card">
+    <label for="resourceType">Resource Type</label>
+    <select id="resourceType">
+      <option value="log" selected>Log</option>
+      <option value="fiber">Fiber</option>
+      <option value="leather">Leather</option>
+      <option value="ore">Ore</option>
+    </select>
+  </div>
+  <div class="card">
+    <label for="stepSelect">Refining Step</label>
+    <select id="stepSelect">
+      <option value="3-4">T3 → T4</option>
+      <option value="4-5" selected>T4 → T5</option>
+      <option value="5-6">T5 → T6</option>
+      <option value="6-7">T6 → T7</option>
+      <option value="7-8">T7 → T8</option>
+    </select>
+  </div>
+</div>
+
+<!-- 2. Stock Input -->
+<h2>2. Stock Input</h2>
+<div class="row">
+  <div class="card">
+    <label id="labelPlank" for="plankInput">Lower Tier (refined) stock</label>
+    <input id="plankInput" type="number" value="60" min="0" />
+  </div>
+  <div class="card">
+    <label id="labelLog" for="logInput">Higher Tier (raw) stock</label>
+    <input id="logInput" type="number" value="30" min="0" />
+  </div>
+</div>
+
+<!-- 3. Ratios and Return -->
+<h2>3. Ratios and Return Rate</h2>
+<div class="row">
+  <div class="card">
+    <label for="plankPerOutput">How many refined (lower tier) per 1 output?</label>
+    <input id="plankPerOutput" type="number" value="1" min="1" step="1" />
+  </div>
+  <div class="card">
+    <label for="logPerOutput">How many raw (higher tier) per 1 output?</label>
+    <input id="logPerOutput" type="number" value="3" min="1" step="1" />
+  </div>
+  <div class="card">
+    <label for="returnRate">Return rate (%)</label>
+    <input id="returnRate" type="number" value="35" min="0" max="100" step="1" />
+  </div>
+</div>
+
+<!-- 4. Economic Analysis -->
+<h2>4. Economic Analysis (Market Prices)</h2>
+<div class="row">
+  <div class="card">
+    <label id="labelPlankPrice" for="plankPrice">Lower Tier Price (silver each)</label>
+    <input id="plankPrice" type="number" value="0" min="0" step="1" />
+  </div>
+  <div class="card">
+    <label id="labelLogPrice" for="logPrice">Higher Tier Price (silver each)</label>
+    <input id="logPrice" type="number" value="0" min="0" step="1" />
+  </div>
+  <div class="card">
+    <label id="labelOutputPrice" for="outputPrice">Output Sale Price (silver each)</label>
+    <input id="outputPrice" type="number" value="0" min="0" step="1" />
+  </div>
+</div>
+
+<div class="row">
+  <button onclick="calculate()">Calculate</button>
+  <button onclick="resetAll()" style="background-color:#6b7280;">Reset</button>
+</div>
+
+<!-- 5. Results -->
+<h2>5. Results</h2>
+<div id="results"></div>
+
+<p class="footer">
+  Economic analysis calculates total profit/loss including returned materials value.
+</p>
+</div>
+
+<script>
+// Simple password check
+function checkPassword() {
+const password = document.getElementById("passwordInput").value;
+const lockScreen = document.getElementById("lockScreen");
+const appContainer = document.getElementById("appContainer");
+const lockError = document.getElementById("lockError");
+
+if (password === "selfx") {
+  lockScreen.style.display = "none";
+  appContainer.style.display = "block";
+  lockError.textContent = "";
+} else {
+  lockError.textContent = "Wrong password! Try 'selfx'";
+}
+}
+
+// Enter key support
+document.getElementById("passwordInput").addEventListener("keypress", function(e) {
+if (e.key === "Enter") {
+  checkPassword();
+}
+});
+
+// Resource names mapping
+const resourceNames = {
+log: { raw: "Log", refined: "Plank" },
+fiber: { raw: "Cotton", refined: "Cloth" },
+leather: { raw: "Hide", refined: "Leather" },
+ore: { raw: "Ore", refined: "Metal Bar" }
+};
+
+// Step ratios: [refined_needed, raw_needed]
+const stepRatios = {
+"3-4": [1, 2],
+"4-5": [1, 3],
+"5-6": [1, 4],
+"6-7": [1, 5],
+"7-8": [1, 5]
+};
+
+function updateLabelsAndRatios() {
+const resType = document.getElementById("resourceType").value;
+const step = document.getElementById("stepSelect").value;
+const names = resourceNames[resType];
+const ratios = stepRatios[step];
+
+// Update labels
+document.getElementById("labelPlank").textContent = `Lower Tier (${names.refined}) stock`;
+document.getElementById("labelLog").textContent = `Higher Tier (${names.raw}) stock`;
+document.getElementById("labelPlankPrice").textContent = `${names.refined} Price (silver each)`;
+document.getElementById("labelLogPrice").textContent = `${names.raw} Price (silver each)`;
+
+// Get target tier for output
+const targetTier = step.split('-')[1];
+document.getElementById("labelOutputPrice").textContent = `T${targetTier} ${names.refined} Sale Price (silver each)`;
+
+// Update ratios
+document.getElementById("plankPerOutput").value = ratios[0];
+document.getElementById("logPerOutput").value = ratios[1];
+}
+
+function resetAll() {
+document.getElementById("plankInput").value = "60";
+document.getElementById("logInput").value = "30";
+document.getElementById("returnRate").value = "35";
+document.getElementById("plankPrice").value = "0";
+document.getElementById("logPrice").value = "0";
+document.getElementById("outputPrice").value = "0";
+document.getElementById("stepSelect").value = "4-5";
+document.getElementById("resourceType").value = "log";
+document.getElementById("results").innerHTML = "";
+updateLabelsAndRatios();
+}
+
+function formatNumber(num) {
+return new Intl.NumberFormat('en-US').format(num);
+}
+
+function calculate() {
+// Get values
+const plankStock = parseInt(document.getElementById("plankInput").value) || 0;
+const logStock = parseInt(document.getElementById("logInput").value) || 0;
+const plankPerOut = parseInt(document.getElementById("plankPerOutput").value) || 1;
+const logPerOut = parseInt(document.getElementById("logPerOutput").value) || 1;
+const returnPct = parseFloat(document.getElementById("returnRate").value) || 0;
+const plankPriceVal = parseFloat(document.getElementById("plankPrice").value) || 0;
+const logPriceVal = parseFloat(document.getElementById("logPrice").value) || 0;
+const outputPriceVal = parseFloat(document.getElementById("outputPrice").value) || 0;
+
+const results = document.getElementById("results");
+
+if (plankStock <= 0 && logStock <= 0) {
+  results.innerHTML = `<div style="color:#f87171;font-weight:600;">Error: You need at least some stock to calculate.</div>`;
+  return;
+}
+
+// Calculate maximum possible outputs
+let maxFromPlank = Math.floor(plankStock / plankPerOut);
+let maxFromLog = Math.floor(logStock / logPerOut);
+let maxOutput = Math.min(maxFromPlank, maxFromLog);
+
+if (maxOutput <= 0) {
+  results.innerHTML = `<div style="color:#f87171;font-weight:600;">Error: Insufficient stock for any production.</div>`;
+  return;
+}
+
+// Calculate consumption and returns
+let plankUsed = maxOutput * plankPerOut;
+let logUsed = maxOutput * logPerOut;
+let plankReturn = Math.floor(plankUsed * (returnPct / 100));
+let logReturn = Math.floor(logUsed * (returnPct / 100));
+let plankRemaining = plankStock - plankUsed + plankReturn;
+let logRemaining = logStock - logUsed + logReturn;
+
+// Economic calculations
+let totalCost = (plankUsed * plankPriceVal) + (logUsed * logPriceVal);
+let totalRevenue = maxOutput * outputPriceVal;
+let returnedValue = (plankReturn * plankPriceVal) + (logReturn * logPriceVal);
+let netCost = totalCost - returnedValue;
+let profit = totalRevenue - netCost;
+
+const resNames = resourceNames[document.getElementById("resourceType").value];
+const stepText = document.getElementById("stepSelect").options[document.getElementById("stepSelect").selectedIndex].text;
+
+// Determine profit color
+let profitClass = "profit-neutral";
+let profitSymbol = "";
+if (profit > 0) {
+  profitClass = "profit-positive";
+  profitSymbol = "+";
+} else if (profit < 0) {
+  profitClass = "profit-negative";
+}
+
+results.innerHTML = `
+  <table>
+    <tr>
+      <th colspan="3" style="background-color:#1f2937;color:#facc15;">
+        ${stepText} Refining Results
+      </th>
+    </tr>
+    <tr>
+      <td style="font-weight:600;">Maximum Output</td>
+      <td colspan="2" class="result-highlight">${formatNumber(maxOutput)}</td>
+    </tr>
+    <tr>
+      <th>Material</th>
+      <th>Used</th>
+      <th>Remaining</th>
+    </tr>
+    <tr>
+      <td>${resNames.refined} (lower tier)</td>
+      <td>${formatNumber(plankUsed)}</td>
+      <td>${formatNumber(plankRemaining)}</td>
+    </tr>
+    <tr>
+      <td>${resNames.raw} (higher tier)</td>
+      <td>${formatNumber(logUsed)}</td>
+      <td>${formatNumber(logRemaining)}</td>
+    </tr>
+  </table>
+
+  <div class="return-box">
+    <div class="return-title">Resource Returns (${returnPct}%)</div>
+    <div>
+      ${resNames.refined}: ${formatNumber(plankReturn)} returned<br>
+      ${resNames.raw}: ${formatNumber(logReturn)} returned
+    </div>
+  </div>
+
+  <table style="margin-top:15px;">
+    <tr>
+      <th colspan="2" style="background-color:#1f2937;color:#facc15;">
+        Economic Analysis
+      </th>
+    </tr>
+    <tr>
+      <td>Total Materials Cost</td>
+      <td>${formatNumber(totalCost)} silver</td>
+    </tr>
+    <tr>
+      <td>Returned Materials Value</td>
+      <td>${formatNumber(returnedValue)} silver</td>
+    </tr>
+    <tr>
+      <td>Net Materials Cost</td>
+      <td>${formatNumber(netCost)} silver</td>
+    </tr>
+    <tr>
+      <td>Total Revenue (${formatNumber(maxOutput)} × ${formatNumber(outputPriceVal)})</td>
+      <td>${formatNumber(totalRevenue)} silver</td>
+    </tr>
+    <tr style="border-top:2px solid #facc15;">
+      <td style="font-weight:600;">Net Profit/Loss</td>
+      <td class="${profitClass}" style="font-size:16px;">${profitSymbol}${formatNumber(profit)} silver</td>
+    </tr>
+    <tr>
+      <td>Profit per Output</td>
+      <td class="${profitClass}">${profitSymbol}${formatNumber(Math.round(profit/maxOutput))} silver</td>
+    </tr>
+  </table>
+`;
+}
+
+// Event listeners
+document.getElementById("resourceType").addEventListener("change", updateLabelsAndRatios);
+document.getElementById("stepSelect").addEventListener("change", updateLabelsAndRatios);
+
+// Initialize
+updateLabelsAndRatios();
+</script>
+
+</body>
+</html>
